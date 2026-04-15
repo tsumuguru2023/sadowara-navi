@@ -102,12 +102,19 @@ export const pagesSlugs = defineQuery(`
 `)
 
 export const categoriesQuery = defineQuery(`
-  *[_type == "category" && defined(slug.current)] | order(title asc) {
+  *[_type == "category" && defined(slug.current) && !defined(parent)] | order(title asc) {
     _id,
     title,
     "slug": slug.current,
     description,
-    "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])
+    "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)]),
+    "children": *[_type == "category" && defined(slug.current) && parent._ref == ^._id] | order(title asc) {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])
+    }
   }
 `)
 
@@ -116,7 +123,15 @@ export const categoryBySlugQuery = defineQuery(`
     _id,
     title,
     "slug": slug.current,
-    description
+    description,
+    "parent": parent->{_id, title, "slug": slug.current},
+    "children": *[_type == "category" && defined(slug.current) && parent._ref == ^._id] | order(title asc) {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])
+    }
   }
 `)
 

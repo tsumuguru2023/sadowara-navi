@@ -8,8 +8,7 @@ import {
   categoryPagesSlugs,
   postsByCategoryQuery,
 } from '@/sanity/lib/queries'
-import DateComponent from '@/app/components/Date'
-import Avatar from '@/app/components/Avatar'
+import {PostCard} from '@/app/components/Posts'
 
 type Props = {params: Promise<{slug: string}>}
 
@@ -53,12 +52,24 @@ export default async function CategoryPage(props: Props) {
     <>
       <section className="bg-white">
         <div className="container py-16 sm:py-20">
-          <Link
-            href="/categories"
-            className="font-mono text-xs uppercase tracking-widest text-gray-500 hover:underline"
-          >
-            ← All categories
-          </Link>
+          <nav className="font-mono text-xs uppercase tracking-widest text-gray-500 flex items-center gap-2 flex-wrap">
+            <Link href="/categories" className="hover:underline">
+              All categories
+            </Link>
+            {category.parent && (
+              <>
+                <span className="text-gray-300">/</span>
+                <Link
+                  href={`/categories/${category.parent.slug}`}
+                  className="hover:underline"
+                >
+                  {category.parent.title}
+                </Link>
+              </>
+            )}
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-700">{category.title}</span>
+          </nav>
           <div className="mt-10 max-w-3xl">
             <p className="font-mono uppercase text-xs tracking-widest text-brand mb-4">
               Category
@@ -70,6 +81,29 @@ export default async function CategoryPage(props: Props) {
               <p className="mt-6 text-lg text-gray-600 max-w-xl">{category.description}</p>
             )}
           </div>
+
+          {category.children && category.children.length > 0 && (
+            <div className="mt-12">
+              <p className="font-mono uppercase text-xs tracking-widest text-gray-500 mb-4">
+                Sub-categories
+              </p>
+              <ul className="flex flex-wrap gap-3">
+                {category.children.map((child) => (
+                  <li key={child._id}>
+                    <Link
+                      href={`/categories/${child.slug}`}
+                      className="inline-flex items-baseline gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:border-brand hover:text-brand"
+                    >
+                      <span>{child.title}</span>
+                      <span className="font-mono text-[10px] text-gray-400">
+                        {child.postCount}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div className="border-b border-gray-100" />
       </section>
@@ -77,35 +111,11 @@ export default async function CategoryPage(props: Props) {
       <section className="bg-gray-50">
         <div className="container py-16 sm:py-20">
           {posts && posts.length > 0 ? (
-            <ul className="space-y-6">
+            <div className="grid gap-6 sm:grid-cols-2">
               {posts.map((post) => (
-                <li key={post._id}>
-                  <Link
-                    href={`/posts/${post.slug}`}
-                    className="group block rounded-sm border border-gray-200 bg-white p-6 transition-colors hover:border-brand"
-                  >
-                    <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-brand transition-colors mb-3">
-                      {post.title}
-                    </h2>
-                    {post.excerpt && (
-                      <p className="text-sm leading-6 text-gray-600 line-clamp-2 mb-4">
-                        {post.excerpt}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      {post.author?.firstName && post.author?.lastName ? (
-                        <Avatar person={post.author} small />
-                      ) : (
-                        <span />
-                      )}
-                      <time className="text-gray-500 text-xs font-mono" dateTime={post.date}>
-                        <DateComponent dateString={post.date} />
-                      </time>
-                    </div>
-                  </Link>
-                </li>
+                <PostCard key={post._id} post={post} />
               ))}
-            </ul>
+            </div>
           ) : (
             <p className="text-gray-600">このカテゴリにはまだ記事がありません。</p>
           )}

@@ -35,8 +35,7 @@ export default async function Page() {
               </div>
             ) : (
               <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl leading-relaxed">
-                宮崎県・佐土原の暮らしと地域の物語を、ローカルの視点で。
-                グルメ、イベント、暮らしのリアルを、ゆっくり丁寧に綴る読み物。
+                宮崎県・佐土原のローカル情報。
               </p>
             )}
           </div>

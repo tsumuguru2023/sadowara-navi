@@ -1,9 +1,14 @@
 import Link from 'next/link'
-import {settingsQuery} from '@/sanity/lib/queries'
+
+import {categoriesQuery, settingsQuery} from '@/sanity/lib/queries'
 import {sanityFetch} from '@/sanity/lib/live'
+import CategoryNav from '@/app/components/CategoryNav'
 
 export default async function Header() {
-  const {data: settings} = await sanityFetch({query: settingsQuery})
+  const [{data: settings}, {data: categories}] = await Promise.all([
+    sanityFetch({query: settingsQuery}),
+    sanityFetch({query: categoriesQuery}),
+  ])
 
   return (
     <header className="fixed z-50 h-24 inset-x-0 top-0 bg-white/80 flex items-center backdrop-blur-lg border-b border-gray-100">
@@ -20,21 +25,7 @@ export default async function Header() {
               role="list"
               className="flex items-center gap-4 md:gap-6 leading-5 text-xs sm:text-base tracking-tight font-mono"
             >
-              <li>
-                <Link href="/" className="hover:underline">
-                  Journal
-                </Link>
-              </li>
-              <li>
-                <Link href="/categories" className="hover:underline">
-                  Categories
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="hover:underline">
-                  About
-                </Link>
-              </li>
+              <CategoryNav categories={categories ?? []} />
             </ul>
           </nav>
         </div>

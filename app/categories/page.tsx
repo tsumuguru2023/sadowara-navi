@@ -50,9 +50,25 @@ export default async function CategoriesPage() {
                       </span>
                     </div>
                     {cat.description && (
-                      <p className="text-sm leading-6 text-gray-600 line-clamp-3">
+                      <p className="text-sm leading-6 text-gray-600 line-clamp-3 mb-4">
                         {cat.description}
                       </p>
+                    )}
+                    {cat.children && cat.children.length > 0 && (
+                      <div className="pt-4 mt-auto border-t border-gray-100">
+                        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-2">
+                          Sub-categories
+                        </p>
+                        <ul className="flex flex-wrap gap-2">
+                          {cat.children.map((child) => (
+                            <li key={child._id}>
+                              <span className="inline-block rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">
+                                {child.title}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </Link>
                 </li>

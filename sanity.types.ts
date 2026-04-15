@@ -127,6 +127,13 @@ export type Button = {
   link?: Link;
 };
 
+export type CategoryReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "category";
+};
+
 export type Category = {
   _id: string;
   _type: "category";
@@ -136,6 +143,7 @@ export type Category = {
   title: string;
   slug: Slug;
   description?: string;
+  parent?: CategoryReference;
 };
 
 export type Slug = {
@@ -218,13 +226,6 @@ export type Page = {
         _key: string;
       } & InfoSection)
   >;
-};
-
-export type CategoryReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "category";
 };
 
 export type PersonReference = {
@@ -523,13 +524,13 @@ export type AllSanitySchemaTypes =
   | BlockContentTextOnly
   | BlockContent
   | Button
+  | CategoryReference
   | Category
   | Slug
   | Settings
   | SanityImageCrop
   | SanityImageHotspot
   | Page
-  | CategoryReference
   | PersonReference
   | Post
   | Person
@@ -871,23 +872,42 @@ export type PagesSlugsResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: categoriesQuery
-// Query: *[_type == "category" && defined(slug.current)] | order(title asc) {    _id,    title,    "slug": slug.current,    description,    "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])  }
+// Query: *[_type == "category" && defined(slug.current) && !defined(parent)] | order(title asc) {    _id,    title,    "slug": slug.current,    description,    "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)]),    "children": *[_type == "category" && defined(slug.current) && parent._ref == ^._id] | order(title asc) {      _id,      title,      "slug": slug.current,      description,      "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])    }  }
 export type CategoriesQueryResult = Array<{
   _id: string;
   title: string;
   slug: string;
   description: string | null;
   postCount: number;
+  children: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    description: string | null;
+    postCount: number;
+  }>;
 }>;
 
 // Source: sanity/lib/queries.ts
 // Variable: categoryBySlugQuery
-// Query: *[_type == "category" && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    description  }
+// Query: *[_type == "category" && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    description,    "parent": parent->{_id, title, "slug": slug.current},    "children": *[_type == "category" && defined(slug.current) && parent._ref == ^._id] | order(title asc) {      _id,      title,      "slug": slug.current,      description,      "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])    }  }
 export type CategoryBySlugQueryResult = {
   _id: string;
   title: string;
   slug: string;
   description: string | null;
+  parent: {
+    _id: string;
+    title: string;
+    slug: string;
+  } | null;
+  children: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    description: string | null;
+    postCount: number;
+  }>;
 } | null;
 
 // Source: sanity/lib/queries.ts
@@ -946,8 +966,8 @@ declare module "@sanity/client" {
     '\n  *[_type == "post" && slug.current == $slug] [0] {\n    content[]{\n      ...,\n      markDefs[]{\n        ...,\n        \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n      }\n    },\n    \n  _id,\n  "status": select(_originalId in path("drafts.**") => "draft", "published"),\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  excerpt,\n  coverImage,\n  "date": coalesce(date, _updatedAt),\n  "author": author->{firstName, lastName, picture},\n  "categories": categories[]->{_id, title, "slug": slug.current},\n\n  }\n': PostQueryResult;
     '\n  *[_type == "post" && defined(slug.current)]\n  {"slug": slug.current}\n': PostPagesSlugsResult;
     '\n  *[_type == "page" && defined(slug.current)]\n  {"slug": slug.current}\n': PagesSlugsResult;
-    '\n  *[_type == "category" && defined(slug.current)] | order(title asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    description,\n    "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])\n  }\n': CategoriesQueryResult;
-    '\n  *[_type == "category" && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    description\n  }\n': CategoryBySlugQueryResult;
+    '\n  *[_type == "category" && defined(slug.current) && !defined(parent)] | order(title asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    description,\n    "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)]),\n    "children": *[_type == "category" && defined(slug.current) && parent._ref == ^._id] | order(title asc) {\n      _id,\n      title,\n      "slug": slug.current,\n      description,\n      "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])\n    }\n  }\n': CategoriesQueryResult;
+    '\n  *[_type == "category" && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    description,\n    "parent": parent->{_id, title, "slug": slug.current},\n    "children": *[_type == "category" && defined(slug.current) && parent._ref == ^._id] | order(title asc) {\n      _id,\n      title,\n      "slug": slug.current,\n      description,\n      "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])\n    }\n  }\n': CategoryBySlugQueryResult;
     '\n  *[_type == "post" && defined(slug.current) && references($categoryId)] | order(date desc, _updatedAt desc) {\n    \n  _id,\n  "status": select(_originalId in path("drafts.**") => "draft", "published"),\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  excerpt,\n  coverImage,\n  "date": coalesce(date, _updatedAt),\n  "author": author->{firstName, lastName, picture},\n  "categories": categories[]->{_id, title, "slug": slug.current},\n\n  }\n': PostsByCategoryQueryResult;
     '\n  *[_type == "category" && defined(slug.current)]\n  {"slug": slug.current}\n': CategoryPagesSlugsResult;
   }

@@ -26,8 +26,27 @@ export const category = defineType({
       type: 'text',
       rows: 3,
     }),
+    defineField({
+      name: 'parent',
+      title: '親カテゴリ',
+      description: '上位カテゴリを指定すると、このカテゴリは子カテゴリになります。',
+      type: 'reference',
+      to: [{type: 'category'}],
+      options: {
+        filter: ({document}) => ({
+          filter: '_id != $self && !defined(parent)',
+          params: {self: document._id.replace(/^drafts\./, '')},
+        }),
+      },
+    }),
   ],
   preview: {
-    select: {title: 'title', subtitle: 'description'},
+    select: {title: 'title', subtitle: 'description', parentTitle: 'parent.title'},
+    prepare({title, subtitle, parentTitle}) {
+      return {
+        title,
+        subtitle: parentTitle ? `↳ ${parentTitle} / ${subtitle ?? ''}` : subtitle,
+      }
+    },
   },
 })

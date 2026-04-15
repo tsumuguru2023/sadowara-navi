@@ -1,4 +1,5 @@
 import type {Metadata, ResolvingMetadata} from 'next'
+import Link from 'next/link'
 import {notFound} from 'next/navigation'
 import {type PortableTextBlock} from 'next-sanity'
 import {Suspense} from 'react'
@@ -72,7 +73,9 @@ export default async function PostPage(props: Props) {
           <div>
             <div className="pb-6 grid gap-6 mb-6 border-b border-gray-100">
               <div className="max-w-3xl flex flex-col gap-6">
-                <h1 className="text-4xl text-gray-900 sm:text-5xl lg:text-7xl">{post.title}</h1>
+                <h1 className="text-3xl text-gray-900 sm:text-4xl lg:text-[56px] lg:leading-[1.15] font-semibold tracking-tight">
+                  {post.title}
+                </h1>
               </div>
               <div className="max-w-3xl flex gap-4 items-center">
                 {post.author && post.author.firstName && post.author.lastName && (
@@ -104,12 +107,13 @@ export default async function PostPage(props: Props) {
               {post.categories && post.categories.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-4">
                   {post.categories.map((cat) => (
-                    <span
+                    <Link
                       key={cat._id}
-                      className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-xs font-mono text-gray-700"
+                      href={`/categories/${cat.slug}`}
+                      className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-xs font-mono text-gray-700 transition-colors hover:bg-brand hover:text-white"
                     >
                       {cat.title}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               )}
