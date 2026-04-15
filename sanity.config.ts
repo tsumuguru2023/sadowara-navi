@@ -11,6 +11,7 @@ import {
 } from 'sanity/presentation'
 import {assist} from '@sanity/assist'
 import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
+import {jaJPLocale} from '@sanity/locale-ja-jp'
 
 import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {schemaTypes} from '@/sanity/schemaTypes'
@@ -78,5 +79,6 @@ export default defineConfig({
     unsplashImageAsset(),
     assist(),
     visionTool({defaultApiVersion: apiVersion}),
+    jaJPLocale(),
   ],
 })

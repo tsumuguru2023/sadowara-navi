@@ -70,7 +70,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
 
   return (
     <html lang="en" className={`${inter.variable} ${ibmPlexMono.variable} bg-white text-black`}>
-      <body>
+      <body suppressHydrationWarning>
         <section className="min-h-screen pt-24">
           {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
           <Toaster />
