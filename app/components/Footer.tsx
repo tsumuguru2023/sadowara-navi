@@ -10,7 +10,7 @@ export default function Footer() {
               sadowara navi
             </Link>
             <p className="mt-4 text-sm text-gray-600 leading-relaxed max-w-md">
-              宮崎県・佐土原の暮らしと地域の物語を、ローカルの視点でゆっくり丁寧に。
+              宮崎県・佐土原のローカル情報。
             </p>
           </div>
           <div className="md:col-span-3">
@@ -28,18 +28,28 @@ export default function Footer() {
                   カテゴリ
                 </Link>
               </li>
+            </ul>
+          </div>
+          <div className="md:col-span-3">
+            <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">
+              Site
+            </p>
+            <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/about" className="hover:underline">
                   About
                 </Link>
               </li>
-            </ul>
-          </div>
-          <div className="md:col-span-3">
-            <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">
-              Connect
-            </p>
-            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/contact" className="hover:underline">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:underline">
+                  プライバシーポリシー
+                </Link>
+              </li>
               <li>
                 <Link href="/studio" className="hover:underline">
                   Studio

@@ -83,9 +83,39 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
         .title('Media Library')
         .icon(ImagesIcon)
         .child(
-          S.documentTypeList('sanity.imageAsset')
-            .title('All Images')
-            .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+          S.list()
+            .title('Media Library')
+            .items([
+              S.listItem()
+                .title('All Images')
+                .icon(ImagesIcon)
+                .child(
+                  S.documentTypeList('sanity.imageAsset')
+                    .title('All Images')
+                    .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                ),
+              S.divider(),
+              S.listItem()
+                .title('By Category')
+                .icon(FolderIcon)
+                .child(
+                  S.documentList()
+                    .title('Categories')
+                    .schemaType('category')
+                    .filter('_type == "category"')
+                    .defaultOrdering([{field: 'title', direction: 'asc'}])
+                    .child((categoryId) =>
+                      S.documentList()
+                        .title('Images in Category')
+                        .schemaType('sanity.imageAsset')
+                        .filter(
+                          '_type == "sanity.imageAsset" && _id in *[_type == "post" && references($categoryId)].coverImage.asset._ref',
+                        )
+                        .params({categoryId})
+                        .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                    ),
+                ),
+            ]),
         ),
       S.divider(),
       S.listItem()
