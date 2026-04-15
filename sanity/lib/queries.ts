@@ -1,58 +1,101 @@
-import { groq } from "next-sanity";
+import {defineQuery} from 'next-sanity'
 
-export const postsQuery = groq`
-  *[_type == "post"] | order(publishedAt desc) {
-    _id,
-    title,
-    slug,
-    publishedAt,
-    mainImage,
-    "categories": categories[]->{ _id, title, slug },
-    "author": author->{ name, image },
-    "excerpt": array::join(string::split((pt::text(body)), "")[0..200], "") + "..."
-  }
-`;
+export const settingsQuery = defineQuery(`*[_type == "settings"][0]`)
 
-export const postBySlugQuery = groq`
-  *[_type == "post" && slug.current == $slug][0] {
-    _id,
-    title,
-    slug,
-    publishedAt,
-    mainImage,
-    body,
-    "categories": categories[]->{ _id, title, slug },
-    "author": author->{ name, image, bio }
-  }
-`;
+const postFields = /* groq */ `
+  _id,
+  "status": select(_originalId in path("drafts.**") => "draft", "published"),
+  "title": coalesce(title, "Untitled"),
+  "slug": slug.current,
+  excerpt,
+  coverImage,
+  "date": coalesce(date, _updatedAt),
+  "author": author->{firstName, lastName, picture},
+`
 
-export const categoriesQuery = groq`
-  *[_type == "category"] | order(title asc) {
-    _id,
-    title,
-    slug,
-    description
+const linkReference = /* groq */ `
+  _type == "link" => {
+    "page": page->slug.current,
+    "post": post->slug.current
   }
-`;
+`
 
-export const postsByCategoryQuery = groq`
-  *[_type == "post" && $categoryId in categories[]->_id] | order(publishedAt desc) {
-    _id,
-    title,
-    slug,
-    publishedAt,
-    mainImage,
-    "categories": categories[]->{ _id, title, slug },
-    "author": author->{ name, image },
-    "excerpt": array::join(string::split((pt::text(body)), "")[0..200], "") + "..."
-  }
-`;
+const linkFields = /* groq */ `
+  link {
+      ...,
+      ${linkReference}
+      }
+`
 
-export const categoryBySlugQuery = groq`
-  *[_type == "category" && slug.current == $slug][0] {
+export const getPageQuery = defineQuery(`
+  *[_type == 'page' && slug.current == $slug][0]{
     _id,
-    title,
+    _type,
+    name,
     slug,
-    description
+    heading,
+    subheading,
+    "pageBuilder": pageBuilder[]{
+      ...,
+      _type == "callToAction" => {
+        ...,
+        button {
+          ...,
+          ${linkFields}
+        }
+      },
+      _type == "infoSection" => {
+        content[]{
+          ...,
+          markDefs[]{
+            ...,
+            ${linkReference}
+          }
+        }
+      },
+    },
   }
-`;
+`)
+
+export const sitemapData = defineQuery(`
+  *[_type == "page" || _type == "post" && defined(slug.current)] | order(_type asc) {
+    "slug": slug.current,
+    _type,
+    _updatedAt,
+  }
+`)
+
+export const allPostsQuery = defineQuery(`
+  *[_type == "post" && defined(slug.current)] | order(date desc, _updatedAt desc) {
+    ${postFields}
+  }
+`)
+
+export const morePostsQuery = defineQuery(`
+  *[_type == "post" && _id != $skip && defined(slug.current)] | order(date desc, _updatedAt desc) [0...$limit] {
+    ${postFields}
+  }
+`)
+
+export const postQuery = defineQuery(`
+  *[_type == "post" && slug.current == $slug] [0] {
+    content[]{
+    ...,
+    markDefs[]{
+      ...,
+      ${linkReference}
+    }
+  },
+    ${postFields}
+  }
+`)
+
+export const postPagesSlugs = defineQuery(`
+  *[_type == "post" && defined(slug.current)]
+  {"slug": slug.current}
+`)
+
+export const pagesSlugs = defineQuery(`
+  *[_type == "page" && defined(slug.current)]
+  {"slug": slug.current}
+`)

@@ -1,91 +1,94 @@
-import { client } from "@/sanity/lib/client";
-import { postsQuery } from "@/sanity/lib/queries";
-import PostCard from "./components/PostCard";
-import Link from "next/link";
+import {Suspense} from 'react'
+import Link from 'next/link'
+import {PortableText} from '@portabletext/react'
 
-export const revalidate = 60;
+import {AllPosts} from '@/app/components/Posts'
+import GetStartedCode from '@/app/components/GetStartedCode'
+import SideBySideIcons from '@/app/components/SideBySideIcons'
+import {settingsQuery} from '@/sanity/lib/queries'
+import {sanityFetch} from '@/sanity/lib/live'
+import {dataAttr} from '@/sanity/lib/utils'
 
-export default async function Home() {
-  const posts = await client.fetch(postsQuery);
-  const issue = String(new Date().getFullYear()).slice(-2) + "·" + String(new Date().getMonth() + 1).padStart(2, "0");
+export default async function Page() {
+  const {data: settings} = await sanityFetch({
+    query: settingsQuery,
+  })
 
   return (
-    <div className="max-w-[1280px] mx-auto px-6 md:px-10">
-      {/* Masthead */}
-      <section className="pt-16 md:pt-24 pb-12 md:pb-20 border-b border-line">
-        <div className="flex items-center justify-between mb-10 md:mb-14">
-          <span className="eyebrow">Vol. {issue} — Local Journal</span>
-          <span className="eyebrow hidden md:inline">Miyazaki / Sadowara</span>
-        </div>
-
-        <h1 className="font-display font-black text-[clamp(3rem,9vw,7.5rem)] leading-[0.95] tracking-[-0.035em]">
-          The
-          <br />
-          <span className="italic font-normal">sadowara</span>
-          <span className="text-accent">.</span>
-          <br />
-          Journal
-        </h1>
-
-        <div className="mt-10 md:mt-14 grid md:grid-cols-12 gap-8 items-end">
-          <p className="md:col-span-7 text-base md:text-lg text-mute leading-[1.95] max-w-xl">
-            佐土原の暮らしと地域の物語を、ゆっくり、丁寧に。
-            グルメ、イベント、暮らしのリアル — ローカルから届ける読み物。
-          </p>
-          <div className="md:col-span-5 md:text-right">
-            <Link href="/categories" className="eyebrow link-underline">
-              Browse all topics →
-            </Link>
+    <>
+      <div className="relative">
+        <div className="relative bg-[url(/images/tile-1-black.png)] bg-size-[5px]">
+          <div className="bg-gradient-to-b from-white w-full h-full absolute top-0"></div>
+          <div className="container">
+            <div className="relative min-h-[40vh] mx-auto max-w-2xl pt-10 xl:pt-20 pb-30 space-y-6 lg:max-w-4xl lg:px-12 flex flex-col items-center justify-center">
+              <div className="flex flex-col gap-4 items-center">
+                <div className="text-md leading-6 prose uppercase py-1 px-3 bg-white font-mono italic">
+                  A starter template for
+                </div>
+                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-black">
+                  <Link
+                    className="underline decoration-brand hover:text-brand underline-offset-8 hover:underline-offset-4 transition-all ease-out"
+                    href="https://sanity.io/"
+                  >
+                    Sanity
+                  </Link>
+                  +
+                  <Link
+                    className="underline decoration-black text-framework underline-offset-8 hover:underline-offset-4 transition-all ease-out"
+                    href="https://nextjs.org/"
+                  >
+                    Next.js
+                  </Link>
+                </h1>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* Featured */}
-      {posts.length > 0 ? (
-        <>
-          <section className="py-16 md:py-24 border-b border-line">
-            <div className="flex items-center gap-4 mb-10">
-              <span className="font-mono text-xs text-accent">— 01</span>
-              <span className="eyebrow">This Week's Read</span>
-            </div>
-            <PostCard post={posts[0]} index={0} featured />
-          </section>
-
-          {/* Grid */}
-          {posts.length > 1 && (
-            <section className="py-16 md:py-24">
-              <div className="flex items-center justify-between mb-10 md:mb-14">
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-xs text-accent">— 02</span>
-                  <span className="eyebrow">Latest Stories</span>
+        <div className=" flex flex-col items-center">
+          <SideBySideIcons />
+          <div className="container relative mx-auto max-w-2xl pb-20 pt-10 space-y-6 lg:max-w-4xl lg:px-12 flex flex-col items-center">
+            <div className="prose sm:prose-lg md:prose-xl xl:prose-2xl text-gray-700 prose-a:text-gray-700 font-light text-center">
+              {settings?.description && (
+                <div
+                  data-sanity={dataAttr({
+                    id: settings._id,
+                    type: 'settings',
+                    path: 'description',
+                  }).toString()}
+                >
+                  <PortableText value={settings.description} />
                 </div>
-                <span className="font-mono text-xs text-mute">
-                  {String(posts.length - 1).padStart(2, "0")} entries
-                </span>
+              )}
+              <div className="flex items-center flex-col gap-4">
+                <GetStartedCode />
+                <Link
+                  href="https://www.sanity.io/docs"
+                  className="inline-flex text-brand text-xs md:text-sm underline hover:text-gray-900"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Sanity Documentation
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    className="w-4 h-4 ml-1 inline"
+                    fill="currentColor"
+                  >
+                    <path d="M10 6V8H5V19H16V14H18V20C18 20.5523 17.5523 21 17 21H4C3.44772 21 3 20.5523 3 20V7C3 6.44772 3.44772 6 4 6H10ZM21 3V12L17.206 8.207L11.2071 14.2071L9.79289 12.7929L15.792 6.793L12 3H21Z"></path>
+                  </svg>
+                </Link>
               </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
-                {posts.slice(1).map((post: any, index: number) => (
-                  <PostCard key={post._id} post={post} index={index + 1} />
-                ))}
-              </div>
-            </section>
-          )}
-        </>
-      ) : (
-        <section className="py-32 text-center">
-          <p className="eyebrow mb-6">Coming soon</p>
-          <p className="font-display text-3xl md:text-4xl text-ink mb-8">
-            まだ記事がありません。
-          </p>
-          <Link
-            href="/studio"
-            className="inline-block eyebrow border-b border-accent pb-1 text-accent"
-          >
-            Studio で記事を作成 →
-          </Link>
-        </section>
-      )}
-    </div>
-  );
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-gray-100 bg-gray-50">
+        <div className="container">
+          <aside className="py-12 sm:py-20">
+            <Suspense>{await AllPosts()}</Suspense>
+          </aside>
+        </div>
+      </div>
+    </>
+  )
 }
