@@ -9,7 +9,7 @@ import Avatar from '@/app/components/Avatar'
 import {dataAttr} from '@/sanity/lib/utils'
 
 const Post = ({post}: {post: AllPostsQueryResult[number]}) => {
-  const {_id, title, slug, excerpt, date, author} = post
+  const {_id, title, slug, excerpt, date, author, categories} = post
 
   return (
     <article
@@ -21,6 +21,19 @@ const Post = ({post}: {post: AllPostsQueryResult[number]}) => {
         <span className="absolute inset-0 z-10" />
       </Link>
       <div>
+        {categories && categories.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {categories.map((cat) => (
+              <Link
+                key={cat._id}
+                href={`/categories/${cat.slug}`}
+                className="relative z-20 inline-flex items-center px-2.5 py-0.5 rounded-full bg-white border border-gray-200 text-xs font-mono text-gray-700 hover:border-brand hover:text-brand transition-colors"
+              >
+                {cat.title}
+              </Link>
+            ))}
+          </div>
+        )}
         <h3 className="text-2xl mb-4">{title}</h3>
 
         <p className="line-clamp-3 text-sm leading-6 text-gray-600 max-w-[70ch]">{excerpt}</p>

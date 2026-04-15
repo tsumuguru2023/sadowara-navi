@@ -43,6 +43,13 @@ export const post = defineType({
       type: 'text',
     }),
     defineField({
+      name: 'categories',
+      title: 'Categories',
+      type: 'array',
+      of: [{type: 'reference', to: [{type: 'category'}]}],
+      options: {layout: 'tags'},
+    }),
+    defineField({
       name: 'coverImage',
       title: 'Cover Image',
       type: 'image',

@@ -11,6 +11,7 @@ const postFields = /* groq */ `
   coverImage,
   "date": coalesce(date, _updatedAt),
   "author": author->{firstName, lastName, picture},
+  "categories": categories[]->{_id, title, "slug": slug.current},
 `
 
 const linkReference = /* groq */ `
@@ -80,12 +81,12 @@ export const morePostsQuery = defineQuery(`
 export const postQuery = defineQuery(`
   *[_type == "post" && slug.current == $slug] [0] {
     content[]{
-    ...,
-    markDefs[]{
       ...,
-      ${linkReference}
-    }
-  },
+      markDefs[]{
+        ...,
+        ${linkReference}
+      }
+    },
     ${postFields}
   }
 `)
@@ -97,5 +98,35 @@ export const postPagesSlugs = defineQuery(`
 
 export const pagesSlugs = defineQuery(`
   *[_type == "page" && defined(slug.current)]
+  {"slug": slug.current}
+`)
+
+export const categoriesQuery = defineQuery(`
+  *[_type == "category" && defined(slug.current)] | order(title asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])
+  }
+`)
+
+export const categoryBySlugQuery = defineQuery(`
+  *[_type == "category" && slug.current == $slug][0] {
+    _id,
+    title,
+    "slug": slug.current,
+    description
+  }
+`)
+
+export const postsByCategoryQuery = defineQuery(`
+  *[_type == "post" && defined(slug.current) && references($categoryId)] | order(date desc, _updatedAt desc) {
+    ${postFields}
+  }
+`)
+
+export const categoryPagesSlugs = defineQuery(`
+  *[_type == "category" && defined(slug.current)]
   {"slug": slug.current}
 `)

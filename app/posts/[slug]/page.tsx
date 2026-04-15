@@ -101,6 +101,18 @@ export default async function PostPage(props: Props) {
                   value={post.content as PortableTextBlock[]}
                 />
               )}
+              {post.categories && post.categories.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-4">
+                  {post.categories.map((cat) => (
+                    <span
+                      key={cat._id}
+                      className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-xs font-mono text-gray-700"
+                    >
+                      {cat.title}
+                    </span>
+                  ))}
+                </div>
+              )}
             </article>
           </div>
         </div>

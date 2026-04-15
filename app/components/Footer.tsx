@@ -24,6 +24,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/categories" className="hover:underline">
+                  カテゴリ
+                </Link>
+              </li>
+              <li>
                 <Link href="/about" className="hover:underline">
                   About
                 </Link>
