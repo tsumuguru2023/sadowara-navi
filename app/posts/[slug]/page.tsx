@@ -8,17 +8,12 @@ import PortableTextRenderer from "@/app/components/PortableTextRenderer";
 
 export const revalidate = 60;
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
+type Props = { params: Promise<{ slug: string }> };
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params;
   const post = await client.fetch(postBySlugQuery, { slug });
-
-  if (!post) {
-    notFound();
-  }
+  if (!post) notFound();
 
   const date = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString("ja-JP", {
@@ -29,89 +24,90 @@ export default async function PostPage({ params }: Props) {
     : "";
 
   return (
-    <article className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-      {/* Back link */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1 text-sm mb-8 hover:opacity-60 transition-opacity"
-        style={{ color: 'var(--color-text-muted)' }}
-      >
-        ← 記事一覧に戻る
-      </Link>
+    <article className="pb-32">
+      {/* Hero */}
+      <header className="max-w-[1100px] mx-auto px-6 md:px-10 pt-12 md:pt-20">
+        <Link href="/" className="eyebrow link-underline">
+          ← Back to Journal
+        </Link>
 
-      {/* Meta */}
-      <div className="flex items-center gap-3 mb-4">
-        {post.categories?.map((cat: any) => (
-          <Link
-            key={cat._id}
-            href={`/categories/${cat.slug.current}`}
-            className="text-xs font-medium px-2.5 py-1 rounded-full hover:opacity-80 transition-opacity"
-            style={{
-              background: 'var(--color-accent-light)',
-              color: 'var(--color-accent)',
-            }}
-          >
-            {cat.title}
-          </Link>
-        ))}
-        <time className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-          {date}
-        </time>
-      </div>
+        <div className="mt-12 md:mt-20 max-w-3xl">
+          <div className="flex items-center gap-4 mb-8">
+            {post.categories?.map((cat: any) => (
+              <Link
+                key={cat._id}
+                href={`/categories/${cat.slug.current}`}
+                className="eyebrow text-accent link-underline"
+              >
+                {cat.title}
+              </Link>
+            ))}
+            <span className="rule-vertical" />
+            <time className="font-mono text-xs text-mute">{date}</time>
+          </div>
 
-      {/* Title */}
-      <h1
-        className="text-3xl md:text-4xl font-bold leading-tight tracking-tight animate-fade-in-up"
-        style={{ fontFamily: 'var(--font-display)' }}
-      >
-        {post.title}
-      </h1>
+          <h1 className="animate-fade-in font-display font-bold text-[clamp(2.2rem,6vw,4.5rem)] leading-[1.08] tracking-[-0.025em]">
+            {post.title}
+          </h1>
 
-      {/* Author */}
-      {post.author && (
-        <div className="flex items-center gap-3 mt-6 mb-8">
-          {post.author.image && (
-            <Image
-              src={urlFor(post.author.image).width(40).height(40).url()}
-              alt={post.author.name}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
+          {post.author && (
+            <div
+              className="animate-fade-in flex items-center gap-3 mt-10"
+              style={{ animationDelay: "0.1s" }}
+            >
+              {post.author.image && (
+                <Image
+                  src={urlFor(post.author.image).width(80).height(80).url()}
+                  alt={post.author.name}
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+              )}
+              <div>
+                <p className="eyebrow">Words by</p>
+                <p className="font-display text-base font-bold mt-0.5">
+                  {post.author.name}
+                </p>
+              </div>
+            </div>
           )}
-          <span className="text-sm font-medium">{post.author.name}</span>
         </div>
-      )}
+      </header>
 
-      {/* Main Image */}
+      {/* Cover */}
       {post.mainImage && (
-        <div className="relative aspect-[16/9] overflow-hidden rounded-xl my-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <Image
-            src={urlFor(post.mainImage).width(1200).height(675).url()}
-            alt={post.title}
-            fill
-            className="object-cover"
-            priority
-          />
+        <div
+          className="animate-fade-in max-w-[1280px] mx-auto px-6 md:px-10 mt-14 md:mt-20"
+          style={{ animationDelay: "0.15s" }}
+        >
+          <div className="relative aspect-[16/9] overflow-hidden bg-paper">
+            <Image
+              src={urlFor(post.mainImage).width(1600).height(900).url()}
+              alt={post.title}
+              fill
+              priority
+              className="object-cover"
+            />
+          </div>
         </div>
       )}
 
       {/* Body */}
-      <div className="mt-10 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+      <div
+        className="animate-fade-in max-w-[680px] mx-auto px-6 md:px-0 mt-16 md:mt-24 prose"
+        style={{ animationDelay: "0.2s" }}
+      >
         {post.body && <PortableTextRenderer value={post.body} />}
       </div>
 
-      {/* Bottom nav */}
-      <div
-        className="mt-16 pt-8"
-        style={{ borderTop: '1px solid var(--color-border)' }}
-      >
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm hover:opacity-60 transition-opacity"
-          style={{ color: 'var(--color-accent)' }}
-        >
-          ← 記事一覧に戻る
+      {/* Footer nav */}
+      <div className="max-w-[680px] mx-auto px-6 md:px-0 mt-24 pt-10 border-t border-line flex items-center justify-between">
+        <Link href="/" className="eyebrow link-underline">
+          ← Back to Journal
+        </Link>
+        <Link href="/categories" className="eyebrow link-underline text-accent">
+          Browse Topics →
         </Link>
       </div>
     </article>

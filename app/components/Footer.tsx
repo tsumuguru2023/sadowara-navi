@@ -2,44 +2,44 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer
-      className="border-t mt-20"
-      style={{ borderColor: 'var(--color-border)', background: 'var(--color-card-bg)' }}
-    >
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-          <div>
+    <footer className="mt-32 border-t border-line bg-paper">
+      <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20">
+        <div className="grid gap-12 md:grid-cols-12">
+          <div className="md:col-span-6">
             <Link
               href="/"
-              className="text-xl font-bold tracking-tight"
-              style={{ fontFamily: 'var(--font-display)' }}
+              className="font-display text-3xl md:text-4xl font-bold tracking-tight text-ink"
             >
-              sadowara navi
+              sadowara<span className="text-accent">.</span>navi
             </Link>
-            <p
-              className="mt-2 text-sm"
-              style={{ color: 'var(--color-text-muted)' }}
-            >
-              佐土原の暮らしと情報を届けるブログ
+            <p className="mt-5 text-sm text-mute max-w-sm leading-relaxed">
+              宮崎県・佐土原の暮らし、グルメ、地域のリアル。
+              <br />
+              ローカルから届ける、ささやかな読み物。
             </p>
           </div>
-          <nav className="flex gap-8">
-            <Link href="/" className="text-sm hover:opacity-60 transition-opacity" style={{ color: 'var(--color-text-muted)' }}>
-              記事一覧
-            </Link>
-            <Link href="/categories" className="text-sm hover:opacity-60 transition-opacity" style={{ color: 'var(--color-text-muted)' }}>
-              カテゴリ
-            </Link>
-            <Link href="/about" className="text-sm hover:opacity-60 transition-opacity" style={{ color: 'var(--color-text-muted)' }}>
-              About
-            </Link>
-          </nav>
+
+          <div className="md:col-span-3">
+            <p className="eyebrow mb-4">Browse</p>
+            <ul className="space-y-2.5 text-sm">
+              <li><Link href="/" className="link-underline">記事一覧</Link></li>
+              <li><Link href="/categories" className="link-underline">カテゴリ</Link></li>
+              <li><Link href="/about" className="link-underline">About</Link></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-3">
+            <p className="eyebrow mb-4">Connect</p>
+            <ul className="space-y-2.5 text-sm">
+              <li><Link href="/about" className="link-underline">お問い合わせ</Link></li>
+              <li><Link href="/studio" className="link-underline">Studio</Link></li>
+            </ul>
+          </div>
         </div>
-        <div
-          className="mt-10 pt-6 text-xs text-center"
-          style={{ borderTop: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}
-        >
-          © {new Date().getFullYear()} sadowara navi. All rights reserved.
+
+        <div className="mt-16 pt-6 border-t border-line flex items-center justify-between text-xs text-mute">
+          <span className="font-mono tracking-widest">© 2026 SADOWARA NAVI</span>
+          <span className="font-mono tracking-widest hidden md:inline">MIYAZAKI · JAPAN</span>
         </div>
       </div>
     </footer>

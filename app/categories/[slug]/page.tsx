@@ -6,55 +6,51 @@ import PostCard from "@/app/components/PostCard";
 
 export const revalidate = 60;
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
+type Props = { params: Promise<{ slug: string }> };
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   const category = await client.fetch(categoryBySlugQuery, { slug });
+  if (!category) notFound();
 
-  if (!category) {
-    notFound();
-  }
-
-  const posts = await client.fetch(postsByCategoryQuery, {
-    categoryId: category._id,
-  });
+  const posts = await client.fetch(postsByCategoryQuery, { categoryId: category._id });
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
-      <Link
-        href="/categories"
-        className="inline-flex items-center gap-1 text-sm mb-8 hover:opacity-60 transition-opacity"
-        style={{ color: 'var(--color-text-muted)' }}
-      >
-        ← カテゴリ一覧に戻る
-      </Link>
+    <div className="max-w-[1280px] mx-auto px-6 md:px-10 pb-32">
+      <section className="pt-12 md:pt-20 pb-12 md:pb-16 border-b border-line">
+        <Link href="/categories" className="eyebrow link-underline">
+          ← All topics
+        </Link>
 
-      <h1
-        className="text-3xl md:text-4xl font-bold tracking-tight"
-        style={{ fontFamily: 'var(--font-display)' }}
-      >
-        {category.title}
-      </h1>
-      {category.description && (
-        <p className="mt-3" style={{ color: 'var(--color-text-muted)' }}>
-          {category.description}
-        </p>
+        <div className="mt-12 grid md:grid-cols-12 gap-8 items-end">
+          <div className="md:col-span-8">
+            <span className="eyebrow text-accent">Topic</span>
+            <h1 className="mt-4 font-display font-bold text-[clamp(2.5rem,7vw,5rem)] leading-[1.05] tracking-[-0.025em]">
+              {category.title}
+            </h1>
+            {category.description && (
+              <p className="mt-6 text-base md:text-lg text-mute max-w-xl leading-[1.95]">
+                {category.description}
+              </p>
+            )}
+          </div>
+          <div className="md:col-span-4 md:text-right">
+            <span className="font-mono text-xs text-mute">
+              {String(posts.length).padStart(2, "0")} entries
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {posts.length > 0 ? (
+        <div className="mt-4">
+          {posts.map((post: any, i: number) => (
+            <PostCard key={post._id} post={post} index={i} variant="list" />
+          ))}
+        </div>
+      ) : (
+        <p className="mt-16 text-mute">このカテゴリにはまだ記事がありません。</p>
       )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-        {posts.length > 0 ? (
-          posts.map((post: any, index: number) => (
-            <PostCard key={post._id} post={post} index={index} />
-          ))
-        ) : (
-          <p style={{ color: 'var(--color-text-muted)' }}>
-            このカテゴリにはまだ記事がありません。
-          </p>
-        )}
-      </div>
     </div>
   );
 }

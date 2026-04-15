@@ -8,49 +8,48 @@ export default async function CategoriesPage() {
   const categories = await client.fetch(categoriesQuery);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
-      <h1
-        className="text-3xl md:text-4xl font-bold tracking-tight"
-        style={{ fontFamily: 'var(--font-display)' }}
-      >
-        カテゴリ
-      </h1>
-      <p className="mt-3" style={{ color: 'var(--color-text-muted)' }}>
-        興味のあるカテゴリから記事を探す
-      </p>
+    <div className="max-w-[1280px] mx-auto px-6 md:px-10 pb-32">
+      <section className="pt-16 md:pt-24 pb-16 md:pb-24 border-b border-line">
+        <span className="eyebrow">— Index</span>
+        <h1 className="mt-6 font-display font-black text-[clamp(2.5rem,8vw,6rem)] leading-[1] tracking-[-0.03em]">
+          Topics<span className="text-accent">.</span>
+        </h1>
+        <p className="mt-8 max-w-xl text-base md:text-lg text-mute leading-[1.95]">
+          興味のあるカテゴリから、佐土原のもうひとつの物語を辿る。
+        </p>
+      </section>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-12">
-        {categories.length > 0 ? (
-          categories.map((cat: any, index: number) => (
-            <Link
+      {categories.length > 0 ? (
+        <ul className="mt-4">
+          {categories.map((cat: any, i: number) => (
+            <li
               key={cat._id}
-              href={`/categories/${cat.slug.current}`}
-              className="group block p-6 rounded-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in-up"
-              style={{
-                background: 'var(--color-card-bg)',
-                border: '1px solid var(--color-border)',
-                animationDelay: `${index * 0.1}s`,
-              }}
+              className="animate-fade-in border-b border-line"
+              style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <h2 className="text-lg font-bold group-hover:opacity-70 transition-opacity">
-                {cat.title}
-              </h2>
-              {cat.description && (
-                <p
-                  className="mt-2 text-sm"
-                  style={{ color: 'var(--color-text-muted)' }}
-                >
-                  {cat.description}
+              <Link
+                href={`/categories/${cat.slug.current}`}
+                className="group grid md:grid-cols-12 gap-6 items-baseline py-8 md:py-12 transition-colors hover:bg-paper -mx-6 px-6 md:-mx-10 md:px-10"
+              >
+                <span className="md:col-span-1 font-mono text-xs text-accent">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h2 className="md:col-span-7 font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.1] transition-colors group-hover:text-accent">
+                  {cat.title}
+                </h2>
+                <p className="md:col-span-3 text-sm text-mute leading-[1.85]">
+                  {cat.description ?? "—"}
                 </p>
-              )}
-            </Link>
-          ))
-        ) : (
-          <p style={{ color: 'var(--color-text-muted)' }}>
-            カテゴリがまだありません。
-          </p>
-        )}
-      </div>
+                <span className="md:col-span-1 md:text-right eyebrow group-hover:text-accent transition-colors">
+                  View →
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-16 text-mute">カテゴリがまだありません。</p>
+      )}
     </div>
   );
 }
