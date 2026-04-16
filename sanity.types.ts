@@ -986,7 +986,7 @@ export type CategoryPagesSlugsResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: eventsInRangeQuery
-// Query: *[_type == "event" && defined(date) && date >= $from && date <= $to] | order(date asc, startTime asc) {    _id,    "title": coalesce(title, "Untitled"),    "slug": slug.current,    date,    startTime,    endTime,    location,    "categories": categories[]->{_id, title, "slug": slug.current}  }
+// Query: *[_type == "event" && defined(slug.current) && defined(date) && date >= $from && date <= $to]    | order(date asc, startTime asc) {      _id,  "title": coalesce(title, "Untitled"),  "slug": slug.current,  date,  startTime,  endTime,  location,  "categories": categories[]->{_id, title, "slug": slug.current}  }
 export type EventsInRangeQueryResult = Array<{
   _id: string;
   title: string;
@@ -1004,7 +1004,7 @@ export type EventsInRangeQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: eventBySlugQuery
-// Query: *[_type == "event" && slug.current == $slug][0] {    _id,    "title": coalesce(title, "Untitled"),    "slug": slug.current,    date,    startTime,    endTime,    location,    summary,    description,    image,    "categories": categories[]->{_id, title, "slug": slug.current},    "previous": *[      _type == "event" && defined(slug.current) && _id != ^._id &&      (date < ^.date || (date == ^.date && coalesce(startTime, "00:00") < coalesce(^.startTime, "00:00")))    ] | order(date desc, coalesce(startTime, "00:00") desc)[0] {      "title": coalesce(title, "Untitled"),      "slug": slug.current,      date    },    "next": *[      _type == "event" && defined(slug.current) && _id != ^._id &&      (date > ^.date || (date == ^.date && coalesce(startTime, "00:00") > coalesce(^.startTime, "00:00")))    ] | order(date asc, coalesce(startTime, "00:00") asc)[0] {      "title": coalesce(title, "Untitled"),      "slug": slug.current,      date    }  }
+// Query: *[_type == "event" && slug.current == $slug][0] {      _id,  "title": coalesce(title, "Untitled"),  "slug": slug.current,  date,  startTime,  endTime,  location,  "categories": categories[]->{_id, title, "slug": slug.current},    summary,    description,    image,    "previous": *[      _type == "event" && defined(slug.current) && _id != ^._id &&      (date < ^.date || (date == ^.date && coalesce(startTime, "00:00") < coalesce(^.startTime, "00:00")))    ] | order(date desc, coalesce(startTime, "00:00") desc)[0]   {    "title": coalesce(title, "Untitled"),    "slug": slug.current,    date  },    "next": *[      _type == "event" && defined(slug.current) && _id != ^._id &&      (date > ^.date || (date == ^.date && coalesce(startTime, "00:00") > coalesce(^.startTime, "00:00")))    ] | order(date asc, coalesce(startTime, "00:00") asc)[0]   {    "title": coalesce(title, "Untitled"),    "slug": slug.current,    date  }  }
 export type EventBySlugQueryResult = {
   _id: string;
   title: string;
@@ -1013,6 +1013,11 @@ export type EventBySlugQueryResult = {
   startTime: string | null;
   endTime: string | null;
   location: string | null;
+  categories: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+  }> | null;
   summary: string | null;
   description: string | null;
   image: {
@@ -1023,11 +1028,6 @@ export type EventBySlugQueryResult = {
     alt?: string;
     _type: "image";
   } | null;
-  categories: Array<{
-    _id: string;
-    title: string;
-    slug: string;
-  }> | null;
   previous: {
     title: string;
     slug: string;
@@ -1038,6 +1038,15 @@ export type EventBySlugQueryResult = {
     slug: string;
     date: string;
   } | null;
+} | null;
+
+// Source: sanity/lib/queries.ts
+// Variable: eventMetaBySlugQuery
+// Query: *[_type == "event" && slug.current == $slug][0] {    "title": coalesce(title, "Untitled"),    summary,    description  }
+export type EventMetaBySlugQueryResult = {
+  title: string;
+  summary: string | null;
+  description: string | null;
 } | null;
 
 // Source: sanity/lib/queries.ts
@@ -1063,8 +1072,9 @@ declare module "@sanity/client" {
     '\n  *[_type == "category" && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    description,\n    "parent": parent->{_id, title, "slug": slug.current},\n    "children": *[_type == "category" && defined(slug.current) && parent._ref == ^._id] | order(title asc) {\n      _id,\n      title,\n      "slug": slug.current,\n      description,\n      "postCount": count(*[_type == "post" && defined(slug.current) && references(^._id)])\n    }\n  }\n': CategoryBySlugQueryResult;
     '\n  *[_type == "post" && defined(slug.current) && references($categoryId)] | order(date desc, _updatedAt desc) {\n    \n  _id,\n  "status": select(_originalId in path("drafts.**") => "draft", "published"),\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  excerpt,\n  coverImage,\n  "date": coalesce(date, _updatedAt),\n  "author": author->{firstName, lastName, picture},\n  "categories": categories[]->{_id, title, "slug": slug.current},\n\n  }\n': PostsByCategoryQueryResult;
     '\n  *[_type == "category" && defined(slug.current)]\n  {"slug": slug.current}\n': CategoryPagesSlugsResult;
-    '\n  *[_type == "event" && defined(date) && date >= $from && date <= $to] | order(date asc, startTime asc) {\n    _id,\n    "title": coalesce(title, "Untitled"),\n    "slug": slug.current,\n    date,\n    startTime,\n    endTime,\n    location,\n    "categories": categories[]->{_id, title, "slug": slug.current}\n  }\n': EventsInRangeQueryResult;
-    '\n  *[_type == "event" && slug.current == $slug][0] {\n    _id,\n    "title": coalesce(title, "Untitled"),\n    "slug": slug.current,\n    date,\n    startTime,\n    endTime,\n    location,\n    summary,\n    description,\n    image,\n    "categories": categories[]->{_id, title, "slug": slug.current},\n    "previous": *[\n      _type == "event" && defined(slug.current) && _id != ^._id &&\n      (date < ^.date || (date == ^.date && coalesce(startTime, "00:00") < coalesce(^.startTime, "00:00")))\n    ] | order(date desc, coalesce(startTime, "00:00") desc)[0] {\n      "title": coalesce(title, "Untitled"),\n      "slug": slug.current,\n      date\n    },\n    "next": *[\n      _type == "event" && defined(slug.current) && _id != ^._id &&\n      (date > ^.date || (date == ^.date && coalesce(startTime, "00:00") > coalesce(^.startTime, "00:00")))\n    ] | order(date asc, coalesce(startTime, "00:00") asc)[0] {\n      "title": coalesce(title, "Untitled"),\n      "slug": slug.current,\n      date\n    }\n  }\n': EventBySlugQueryResult;
+    '\n  *[_type == "event" && defined(slug.current) && defined(date) && date >= $from && date <= $to]\n    | order(date asc, startTime asc) {\n    \n  _id,\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  date,\n  startTime,\n  endTime,\n  location,\n  "categories": categories[]->{_id, title, "slug": slug.current}\n\n  }\n': EventsInRangeQueryResult;
+    '\n  *[_type == "event" && slug.current == $slug][0] {\n    \n  _id,\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  date,\n  startTime,\n  endTime,\n  location,\n  "categories": categories[]->{_id, title, "slug": slug.current}\n,\n    summary,\n    description,\n    image,\n    "previous": *[\n      _type == "event" && defined(slug.current) && _id != ^._id &&\n      (date < ^.date || (date == ^.date && coalesce(startTime, "00:00") < coalesce(^.startTime, "00:00")))\n    ] | order(date desc, coalesce(startTime, "00:00") desc)[0] \n  {\n    "title": coalesce(title, "Untitled"),\n    "slug": slug.current,\n    date\n  }\n,\n    "next": *[\n      _type == "event" && defined(slug.current) && _id != ^._id &&\n      (date > ^.date || (date == ^.date && coalesce(startTime, "00:00") > coalesce(^.startTime, "00:00")))\n    ] | order(date asc, coalesce(startTime, "00:00") asc)[0] \n  {\n    "title": coalesce(title, "Untitled"),\n    "slug": slug.current,\n    date\n  }\n\n  }\n': EventBySlugQueryResult;
+    '\n  *[_type == "event" && slug.current == $slug][0] {\n    "title": coalesce(title, "Untitled"),\n    summary,\n    description\n  }\n': EventMetaBySlugQueryResult;
     '\n  *[_type == "event" && defined(slug.current)]\n  {"slug": slug.current}\n': EventPagesSlugsResult;
   }
 }

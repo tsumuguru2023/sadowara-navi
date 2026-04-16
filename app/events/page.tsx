@@ -48,17 +48,26 @@ function shiftMonth(year: number, month: number, delta: number) {
   return {year: base.getFullYear(), month: base.getMonth() + 1}
 }
 
-function buildCalendarCells(year: number, month: number) {
+type Cell = {day: number; weekday: number; key: string}
+
+function buildCalendar(year: number, month: number) {
   const firstDay = new Date(year, month - 1, 1)
   const leadingBlanks = firstDay.getDay()
   const daysInMonth = new Date(year, month, 0).getDate()
   const totalCells = Math.ceil((leadingBlanks + daysInMonth) / 7) * 7
 
-  return Array.from({length: totalCells}, (_, i) => {
+  const cells: (Cell | null)[] = Array.from({length: totalCells}, (_, i) => {
     const dayNumber = i - leadingBlanks + 1
     if (dayNumber < 1 || dayNumber > daysInMonth) return null
     return {day: dayNumber, weekday: i % 7, key: toDateKey(year, month, dayNumber)}
   })
+
+  const days = cells.filter((c): c is Cell => c !== null)
+  return {cells, days, daysInMonth}
+}
+
+function weekdayColor(wd: number) {
+  return wd === 0 ? 'text-red-600' : wd === 6 ? 'text-blue-600' : 'text-gray-700'
 }
 
 function groupByDate(events: EventsInRangeQueryResult) {
@@ -74,8 +83,8 @@ function groupByDate(events: EventsInRangeQueryResult) {
 
 export default async function EventsPage({searchParams}: Props) {
   const {year, month} = resolveMonth(await searchParams)
+  const {cells, days, daysInMonth} = buildCalendar(year, month)
   const from = toDateKey(year, month, 1)
-  const daysInMonth = new Date(year, month, 0).getDate()
   const to = toDateKey(year, month, daysInMonth)
 
   const {data: events} = await sanityFetch({
@@ -84,7 +93,6 @@ export default async function EventsPage({searchParams}: Props) {
   })
 
   const eventsByDate = groupByDate(events ?? [])
-  const cells = buildCalendarCells(year, month)
   const prev = shiftMonth(year, month, -1)
   const next = shiftMonth(year, month, 1)
   const today = new Date()
@@ -156,12 +164,6 @@ export default async function EventsPage({searchParams}: Props) {
                 }
                 const dayEvents = eventsByDate.get(cell.key) ?? []
                 const isToday = cell.key === todayKey
-                const weekdayColor =
-                  cell.weekday === 0
-                    ? 'text-red-600'
-                    : cell.weekday === 6
-                      ? 'text-blue-600'
-                      : 'text-gray-700'
                 return (
                   <div
                     key={cell.key}
@@ -169,7 +171,7 @@ export default async function EventsPage({searchParams}: Props) {
                   >
                     <div
                       className={`mb-1 inline-flex h-6 w-6 items-center justify-center font-mono text-xs ${
-                        isToday ? 'rounded-full bg-brand text-white' : weekdayColor
+                        isToday ? 'rounded-full bg-brand text-white' : weekdayColor(cell.weekday)
                       }`}
                     >
                       {cell.day}
@@ -220,19 +222,11 @@ export default async function EventsPage({searchParams}: Props) {
           </div>
 
           <ul className="md:hidden overflow-hidden rounded-sm border border-gray-200 bg-white divide-y divide-gray-100">
-            {Array.from({length: daysInMonth}, (_, i) => {
-              const day = i + 1
-              const key = toDateKey(year, month, day)
-              const weekday = new Date(year, month - 1, day).getDay()
+            {days.map(({day, weekday, key}) => {
               const dayEvents = eventsByDate.get(key) ?? []
               const isToday = key === todayKey
               const hasEvents = dayEvents.length > 0
-              const weekdayColor =
-                weekday === 0
-                  ? 'text-red-600'
-                  : weekday === 6
-                    ? 'text-blue-600'
-                    : 'text-gray-700'
+              const wdColor = weekdayColor(weekday)
               return (
                 <li
                   key={key}
@@ -244,7 +238,7 @@ export default async function EventsPage({searchParams}: Props) {
                         isToday
                           ? 'rounded-full bg-brand text-white'
                           : hasEvents
-                            ? weekdayColor
+                            ? wdColor
                             : 'text-gray-400'
                       }`}
                     >
@@ -252,7 +246,7 @@ export default async function EventsPage({searchParams}: Props) {
                     </span>
                     <span
                       className={`mt-0.5 font-mono text-[10px] uppercase tracking-widest ${
-                        hasEvents ? weekdayColor : 'text-gray-400'
+                        hasEvents ? wdColor : 'text-gray-400'
                       }`}
                     >
                       {WEEKDAY_LABELS[weekday]}

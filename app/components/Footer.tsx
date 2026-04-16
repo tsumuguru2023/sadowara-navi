@@ -42,12 +42,12 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/about" className="hover:underline">
-                  About
+                  サイトについて
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:underline">
-                  Contact
+                  お問い合わせ
                 </Link>
               </li>
               <li>
@@ -55,22 +55,19 @@ export default function Footer() {
                   プライバシーポリシー
                 </Link>
               </li>
-              <li>
-                <a
-                  href="/studio"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  Studio
-                </a>
-              </li>
             </ul>
           </div>
         </div>
         <div className="mt-12 pt-6 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-mono">
           <span>© 2026 sadowara navi</span>
-          <span className="hidden md:inline">Miyazaki · Japan</span>
+          <a
+            href="/studio"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-brand transition-colors"
+          >
+            Studio
+          </a>
         </div>
       </div>
     </footer>

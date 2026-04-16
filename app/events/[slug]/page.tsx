@@ -4,7 +4,7 @@ import {notFound} from 'next/navigation'
 
 import Image from '@/app/components/SanityImage'
 import {sanityFetch} from '@/sanity/lib/live'
-import {eventBySlugQuery, eventPagesSlugs} from '@/sanity/lib/queries'
+import {eventBySlugQuery, eventMetaBySlugQuery, eventPagesSlugs} from '@/sanity/lib/queries'
 
 type Props = {
   params: Promise<{slug: string}>
@@ -22,13 +22,13 @@ export async function generateStaticParams() {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
   const {data: event} = await sanityFetch({
-    query: eventBySlugQuery,
+    query: eventMetaBySlugQuery,
     params,
     stega: false,
   })
   return {
     title: event?.title,
-    description: event?.description ?? undefined,
+    description: event?.summary ?? event?.description ?? undefined,
   }
 }
 
@@ -38,6 +38,46 @@ function formatJapaneseDate(dateString: string | null | undefined) {
   if (Number.isNaN(d.getTime())) return dateString
   const weekday = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()]
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${weekday}）`
+}
+
+type Adjacent = {title: string | null; slug: string | null; date: string | null}
+
+function NavCard({
+  event,
+  direction,
+}: {
+  event: Adjacent | null
+  direction: 'prev' | 'next'
+}) {
+  const isPrev = direction === 'prev'
+  const label = isPrev ? '← 前のイベント' : '次のイベント →'
+  const emptyLabel = isPrev ? '前のイベントはありません' : '次のイベントはありません'
+  const align = isPrev ? '' : 'text-right'
+
+  if (!event?.slug) {
+    return (
+      <div className={`rounded-sm border border-dashed border-gray-200 p-5 ${align}`}>
+        <p className="font-mono text-[11px] uppercase tracking-widest text-gray-400">
+          {emptyLabel}
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      href={`/events/${event.slug}`}
+      className={`group block rounded-sm border border-gray-200 bg-white p-5 transition-colors hover:border-brand ${align}`}
+    >
+      <p className="font-mono text-[11px] uppercase tracking-widest text-gray-500 mb-2">{label}</p>
+      {event.date && (
+        <p className="font-mono text-xs text-gray-500 mb-1">{formatJapaneseDate(event.date)}</p>
+      )}
+      <p className="text-base font-medium text-gray-900 transition-colors group-hover:text-brand">
+        {event.title}
+      </p>
+    </Link>
+  )
 }
 
 export default async function EventPage(props: Props) {
@@ -141,60 +181,20 @@ export default async function EventPage(props: Props) {
           </div>
 
           {(event.previous || event.next) && (
-            <nav
-              aria-label="前後のイベント"
-              className="mt-16 grid gap-4 sm:grid-cols-2"
-            >
-              {event.previous?.slug ? (
-                <Link
-                  href={`/events/${event.previous.slug}`}
-                  className="group block rounded-sm border border-gray-200 bg-white p-5 transition-colors hover:border-brand"
-                >
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-gray-500 mb-2">
-                    ← 前のイベント
-                  </p>
-                  {event.previous.date && (
-                    <p className="font-mono text-xs text-gray-500 mb-1">
-                      {formatJapaneseDate(event.previous.date)}
-                    </p>
-                  )}
-                  <p className="text-base font-medium text-gray-900 transition-colors group-hover:text-brand">
-                    {event.previous.title}
-                  </p>
-                </Link>
-              ) : (
-                <div className="rounded-sm border border-dashed border-gray-200 p-5">
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-gray-400">
-                    前のイベントはありません
-                  </p>
-                </div>
-              )}
-              {event.next?.slug ? (
-                <Link
-                  href={`/events/${event.next.slug}`}
-                  className="group block rounded-sm border border-gray-200 bg-white p-5 text-right transition-colors hover:border-brand"
-                >
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-gray-500 mb-2">
-                    次のイベント →
-                  </p>
-                  {event.next.date && (
-                    <p className="font-mono text-xs text-gray-500 mb-1">
-                      {formatJapaneseDate(event.next.date)}
-                    </p>
-                  )}
-                  <p className="text-base font-medium text-gray-900 transition-colors group-hover:text-brand">
-                    {event.next.title}
-                  </p>
-                </Link>
-              ) : (
-                <div className="rounded-sm border border-dashed border-gray-200 p-5 text-right">
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-gray-400">
-                    次のイベントはありません
-                  </p>
-                </div>
-              )}
+            <nav aria-label="前後のイベント" className="mt-16 grid gap-4 sm:grid-cols-2">
+              <NavCard event={event.previous} direction="prev" />
+              <NavCard event={event.next} direction="next" />
             </nav>
           )}
+
+          <div className="mt-12 text-center">
+            <Link
+              href={backHref}
+              className="inline-block font-mono text-xs uppercase tracking-widest text-gray-500 hover:text-brand transition-colors"
+            >
+              ← イベントカレンダーへ戻る
+            </Link>
+          </div>
         </div>
       </section>
     </>
