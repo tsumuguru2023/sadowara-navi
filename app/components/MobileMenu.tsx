@@ -80,7 +80,7 @@ export default function MobileMenu({categories}: {categories: Category[]}) {
                 onClick={() => setOpen(false)}
                 className="block py-1 font-medium hover:text-brand"
               >
-                イベント
+                イベントカレンダー
               </Link>
             </li>
             {categories.map((cat) => {

@@ -29,7 +29,7 @@ export default async function Header() {
               <CategoryNav categories={categories ?? []} />
               <li>
                 <Link href="/events" className="hover:underline">
-                  イベント
+                  イベントカレンダー
                 </Link>
               </li>
             </ul>

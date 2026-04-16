@@ -96,7 +96,7 @@ export default async function EventsPage({searchParams}: Props) {
         <div className="container py-16 sm:py-20 lg:py-24">
           <div className="max-w-3xl">
             <p className="font-mono uppercase text-xs tracking-widest text-gray-500 mb-5">
-              Events
+              Event Calendar
             </p>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tighter text-gray-900 leading-[1.05]">
               イベントカレンダー
@@ -131,7 +131,7 @@ export default async function EventsPage({searchParams}: Props) {
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-sm border border-gray-200 bg-white">
+          <div className="hidden md:block overflow-hidden rounded-sm border border-gray-200 bg-white">
             <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
               {WEEKDAY_LABELS.map((label, i) => (
                 <div
@@ -218,6 +218,93 @@ export default async function EventsPage({searchParams}: Props) {
               })}
             </div>
           </div>
+
+          <ul className="md:hidden overflow-hidden rounded-sm border border-gray-200 bg-white divide-y divide-gray-100">
+            {Array.from({length: daysInMonth}, (_, i) => {
+              const day = i + 1
+              const key = toDateKey(year, month, day)
+              const weekday = new Date(year, month - 1, day).getDay()
+              const dayEvents = eventsByDate.get(key) ?? []
+              const isToday = key === todayKey
+              const hasEvents = dayEvents.length > 0
+              const weekdayColor =
+                weekday === 0
+                  ? 'text-red-600'
+                  : weekday === 6
+                    ? 'text-blue-600'
+                    : 'text-gray-700'
+              return (
+                <li
+                  key={key}
+                  className={`flex gap-3 px-4 py-3 ${hasEvents ? '' : 'bg-gray-50/40'}`}
+                >
+                  <div className="flex shrink-0 flex-col items-center w-10">
+                    <span
+                      className={`flex h-7 w-7 items-center justify-center font-mono text-sm ${
+                        isToday
+                          ? 'rounded-full bg-brand text-white'
+                          : hasEvents
+                            ? weekdayColor
+                            : 'text-gray-400'
+                      }`}
+                    >
+                      {day}
+                    </span>
+                    <span
+                      className={`mt-0.5 font-mono text-[10px] uppercase tracking-widest ${
+                        hasEvents ? weekdayColor : 'text-gray-400'
+                      }`}
+                    >
+                      {WEEKDAY_LABELS[weekday]}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {hasEvents ? (
+                      <ul className="space-y-1.5">
+                        {dayEvents.map((ev) => {
+                          const label = [ev.startTime, ev.title, ev.location]
+                            .filter(Boolean)
+                            .join(' · ')
+                          return (
+                            <li key={ev._id}>
+                              {ev.slug ? (
+                                <Link
+                                  href={`/events/${ev.slug}`}
+                                  title={label}
+                                  className="group block rounded-sm bg-brand/10 px-2 py-1.5 text-xs leading-snug text-gray-800 transition-colors hover:bg-brand hover:text-white"
+                                >
+                                  {ev.startTime && (
+                                    <span className="font-mono text-gray-500 mr-1.5 group-hover:text-white/80">
+                                      {ev.startTime}
+                                    </span>
+                                  )}
+                                  {ev.title}
+                                </Link>
+                              ) : (
+                                <span
+                                  title={label}
+                                  className="block rounded-sm bg-brand/10 px-2 py-1.5 text-xs leading-snug text-gray-800"
+                                >
+                                  {ev.startTime && (
+                                    <span className="font-mono text-gray-500 mr-1.5">
+                                      {ev.startTime}
+                                    </span>
+                                  )}
+                                  {ev.title}
+                                </span>
+                              )}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    ) : (
+                      <span className="text-xs text-gray-300">—</span>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
 
           {(!events || events.length === 0) && (
             <p className="mt-8 text-center text-sm text-gray-500">

@@ -30,7 +30,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/events" className="hover:underline">
-                  イベント
+                  イベントカレンダー
                 </Link>
               </li>
             </ul>
