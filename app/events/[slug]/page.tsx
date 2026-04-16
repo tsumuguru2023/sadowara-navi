@@ -187,7 +187,7 @@ export default async function EventPage(props: Props) {
             </nav>
           )}
 
-          <div className="mt-12 text-center">
+          <div className="mt-12">
             <Link
               href={backHref}
               className="inline-block font-mono text-xs uppercase tracking-widest text-gray-500 hover:text-brand transition-colors"
