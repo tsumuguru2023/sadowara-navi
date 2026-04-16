@@ -22,24 +22,41 @@ function pad2(n: number) {
   return String(n).padStart(2, '0')
 }
 
+function parseDateKey(dateString: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString)
+  if (!m) return null
+  return {year: Number(m[1]), month: Number(m[2]), day: Number(m[3])}
+}
+
+function weekdayOf({year, month, day}: {year: number; month: number; day: number}) {
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+}
+
 function formatMonthDay(dateString: string) {
-  const d = new Date(`${dateString}T00:00:00+09:00`)
-  if (Number.isNaN(d.getTime())) return dateString
-  const weekday = WEEKDAY_LABELS[d.getDay()]
-  return `${d.getMonth() + 1}月${d.getDate()}日（${weekday}）`
+  const parts = parseDateKey(dateString)
+  if (!parts) return dateString
+  return `${parts.month}月${parts.day}日（${WEEKDAY_LABELS[weekdayOf(parts)]}）`
 }
 
 function toDateKey(year: number, month: number, day: number) {
   return `${year}-${pad2(month)}-${pad2(day)}`
 }
 
+function jstToday() {
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  return {
+    year: now.getUTCFullYear(),
+    month: now.getUTCMonth() + 1,
+    day: now.getUTCDate(),
+  }
+}
+
 function resolveMonth(raw: {year?: string; month?: string}) {
-  const now = new Date()
+  const today = jstToday()
   const year = Number(raw.year)
   const month = Number(raw.month)
-  const safeYear = Number.isFinite(year) && year >= 1900 && year <= 2999 ? year : now.getFullYear()
-  const safeMonth =
-    Number.isFinite(month) && month >= 1 && month <= 12 ? month : now.getMonth() + 1
+  const safeYear = Number.isFinite(year) && year >= 1900 && year <= 2999 ? year : today.year
+  const safeMonth = Number.isFinite(month) && month >= 1 && month <= 12 ? month : today.month
   return {year: safeYear, month: safeMonth}
 }
 
@@ -95,8 +112,8 @@ export default async function EventsPage({searchParams}: Props) {
   const eventsByDate = groupByDate(events ?? [])
   const prev = shiftMonth(year, month, -1)
   const next = shiftMonth(year, month, 1)
-  const today = new Date()
-  const todayKey = toDateKey(today.getFullYear(), today.getMonth() + 1, today.getDate())
+  const today = jstToday()
+  const todayKey = toDateKey(today.year, today.month, today.day)
 
   return (
     <>

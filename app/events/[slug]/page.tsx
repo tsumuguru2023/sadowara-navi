@@ -32,12 +32,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 }
 
+const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'] as const
+
 function formatJapaneseDate(dateString: string | null | undefined) {
   if (!dateString) return ''
-  const d = new Date(`${dateString}T00:00:00+09:00`)
-  if (Number.isNaN(d.getTime())) return dateString
-  const weekday = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()]
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${weekday}）`
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString)
+  if (!m) return dateString
+  const year = Number(m[1])
+  const month = Number(m[2])
+  const day = Number(m[3])
+  const weekday = WEEKDAY_LABELS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()]
+  return `${year}年${month}月${day}日（${weekday}）`
 }
 
 type Adjacent = {title: string | null; slug: string | null; date: string | null}
