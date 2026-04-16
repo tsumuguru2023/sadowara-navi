@@ -106,7 +106,7 @@ export default async function EventPage(props: Props) {
               ← イベントカレンダーへ戻る
             </Link>
             <p className="font-mono uppercase text-xs tracking-widest text-gray-500 mb-5">Event</p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tighter text-gray-900 leading-[1.05]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tighter text-gray-900 leading-[1.2]">
               {event.title}
             </h1>
           </div>
