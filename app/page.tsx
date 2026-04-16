@@ -35,7 +35,7 @@ export default async function Page() {
               </div>
             ) : (
               <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl leading-relaxed">
-                宮崎県・佐土原のローカル情報。
+                宮崎県・佐土原のローカル情報。（デモサイト：Sanity + Next.js）
               </p>
             )}
           </div>
