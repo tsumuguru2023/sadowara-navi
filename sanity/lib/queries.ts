@@ -145,3 +145,53 @@ export const categoryPagesSlugs = defineQuery(`
   *[_type == "category" && defined(slug.current)]
   {"slug": slug.current}
 `)
+
+export const eventsInRangeQuery = defineQuery(`
+  *[_type == "event" && defined(date) && date >= $from && date <= $to] | order(date asc, startTime asc) {
+    _id,
+    "title": coalesce(title, "Untitled"),
+    "slug": slug.current,
+    date,
+    startTime,
+    endTime,
+    location,
+    "categories": categories[]->{_id, title, "slug": slug.current}
+  }
+`)
+
+export const eventBySlugQuery = defineQuery(`
+  *[_type == "event" && slug.current == $slug][0] {
+    _id,
+    "title": coalesce(title, "Untitled"),
+    "slug": slug.current,
+    date,
+    startTime,
+    endTime,
+    location,
+    summary,
+    description,
+    image,
+    "categories": categories[]->{_id, title, "slug": slug.current},
+    "previous": *[
+      _type == "event" && defined(slug.current) && _id != ^._id &&
+      (date < ^.date || (date == ^.date && coalesce(startTime, "00:00") < coalesce(^.startTime, "00:00")))
+    ] | order(date desc, coalesce(startTime, "00:00") desc)[0] {
+      "title": coalesce(title, "Untitled"),
+      "slug": slug.current,
+      date
+    },
+    "next": *[
+      _type == "event" && defined(slug.current) && _id != ^._id &&
+      (date > ^.date || (date == ^.date && coalesce(startTime, "00:00") > coalesce(^.startTime, "00:00")))
+    ] | order(date asc, coalesce(startTime, "00:00") asc)[0] {
+      "title": coalesce(title, "Untitled"),
+      "slug": slug.current,
+      date
+    }
+  }
+`)
+
+export const eventPagesSlugs = defineQuery(`
+  *[_type == "event" && defined(slug.current)]
+  {"slug": slug.current}
+`)

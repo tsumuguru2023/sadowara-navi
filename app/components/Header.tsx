@@ -27,6 +27,11 @@ export default async function Header() {
               className="flex items-center gap-4 md:gap-6 leading-5 text-xs sm:text-base tracking-tight font-mono"
             >
               <CategoryNav categories={categories ?? []} />
+              <li>
+                <Link href="/events" className="hover:underline">
+                  イベント
+                </Link>
+              </li>
             </ul>
           </nav>
 

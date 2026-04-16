@@ -74,6 +74,15 @@ export default function MobileMenu({categories}: {categories: Category[]}) {
         </div>
         <nav className="flex-1 overflow-y-auto px-6 py-6">
           <ul className="space-y-4 text-base tracking-tight">
+            <li>
+              <Link
+                href="/events"
+                onClick={() => setOpen(false)}
+                className="block py-1 font-medium hover:text-brand"
+              >
+                イベント
+              </Link>
+            </li>
             {categories.map((cat) => {
               const hasChildren = (cat.children?.length ?? 0) > 0
               return (

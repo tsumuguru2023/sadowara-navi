@@ -28,6 +28,11 @@ export default function Footer() {
                   カテゴリ
                 </Link>
               </li>
+              <li>
+                <Link href="/events" className="hover:underline">
+                  イベント
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="md:col-span-3">
