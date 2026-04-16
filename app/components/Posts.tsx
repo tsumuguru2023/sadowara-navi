@@ -16,12 +16,12 @@ export const PostCard = ({post}: {post: AllPostsQueryResult[number]}) => {
     <article
       data-sanity={dataAttr({id: _id, type: 'post', path: 'title'}).toString()}
       key={_id}
-      className="group border border-gray-200 rounded-sm overflow-hidden bg-white flex transition-colors hover:border-brand relative"
+      className="group border border-gray-200 rounded-sm overflow-hidden bg-white flex flex-col sm:flex-row transition-colors hover:border-brand relative"
     >
       <Link className="hover:text-brand transition-colors" href={`/posts/${slug}`}>
         <span className="absolute inset-0 z-10" />
       </Link>
-      <div className="w-32 sm:w-40 shrink-0 bg-gray-100 overflow-hidden">
+      <div className="w-full aspect-[16/9] sm:w-40 sm:aspect-auto shrink-0 bg-gray-100 overflow-hidden">
         {coverImage?.asset?._ref ? (
           <Image
             id={coverImage.asset._ref}

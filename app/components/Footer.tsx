@@ -51,9 +51,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/studio" className="hover:underline">
+                <a
+                  href="/studio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
                   Studio
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
